@@ -5,7 +5,8 @@ This module provides a class with 6 methods
 import os
 import pandas as pd
 import requests
-
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 class Group22:
     """
@@ -68,3 +69,40 @@ class Group22:
         self.df = df
 
         return df
+    
+    
+    def get_countries(df):
+        """
+        Returns a list of all the countries of the dataset
+
+        Parameters
+        ----------
+        df : pandas dataframe
+            dataframe of the dataset
+
+        Returns
+        -------
+        list
+        """
+        return list(df['Entity'].unique())
+    
+    def plot_quantity_correlation(df):
+        """
+        Returns a correlation matrix of the quantity columns
+
+        Parameters
+        ----------
+        df : pandas dataframe
+            dataframe of the dataset
+
+        Returns
+        -------
+        correlation matrix
+        """
+        quantity_cols = [col for col in df.columns if '_quantity' in col]
+        quantity_df = df[quantity_cols]
+        corr_matrix = quantity_df.corr()
+
+        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
+        plt.title('Correlation Matrix of Quantity Columns')
+        plt.show()
