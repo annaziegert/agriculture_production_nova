@@ -64,5 +64,7 @@ class Group22:
 
         data_path = os.path.join("downloads", self.filename)
         df = pd.read_csv(data_path, on_bad_lines="skip")
+        
+        self.df = df
 
         return df
