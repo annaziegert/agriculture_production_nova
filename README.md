@@ -1,92 +1,78 @@
-# Group_22
+# Welcome to project Agros
+---
 
+## Scenario
 
+Your company is participating in a two-day hackathon promoted to study the agricultural output of several countries. They send your group, the best team of Data Scientists in the company's roster. By undertaking this task, your company expects to contribute to the green transition by having a more savvy taskforce. You decide to create a python class for the challenge.
 
-## Getting started
+## Goal
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+For this project, we will be using data from [Our World in Data](https://ourworldindata.org/). The dataset can be found [here](https://github.com/owid/owid-datasets/blob/master/datasets/Agricultural%20total%20factor%20productivity%20(USDA)/Agricultural%20total%20factor%20productivity%20(USDA).csv).
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Go over the set. Analyze all the data [here](https://github.com/owid/owid-datasets/tree/master/datasets/Agricultural%20total%20factor%20productivity%20(USDA)).
 
-## Add your files
+<div class="alert alert-danger">
+    <b> THE MOST IMPORTANT TOOLS FOR A DATA SCIENTIST IS PATIENCE AND COMMUNICATION</b>
+    <br>
+    <b> Discuss the contents of the dataset with your colleagues. Understanding the data is a priority. </b>
+</div>
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+Use whatever python tools you find apropriate. We recommend seaborn for plotting.
 
-```
-cd existing_repo
-git remote add origin https://gitlab.com/annaziegert/group_22.git
-git branch -M main
-git push -uf origin main
-```
+## Structure of the project
 
-## Integrate with your tools
+Keep the .py files in a separate directory. The only files in the main directory of the project should be the **Showcase Notebook** and the several configuration files (.yml, .gitignore, and others). Everything else should have their own directories.
 
-- [ ] [Set up project integrations](https://gitlab.com/annaziegert/group_22/-/settings/integrations)
+### Day 1, Phase 1
 
-## Collaborate with your team
+- [ ] One of you will create a gitlab repository (it does not matter who). __THE NAME OF THE REPOSITORY MUST BE "Group_XX" where XX is the number of your group! If you are group 3, then XX must be 03. Always use two digits!__
+- [ ] Initialize the repo with a README.md file, a proper license, and a .gitignore for the programming language you will use.
+- [ ] The one who created the repository will then give __Maintainer__ permissions to the rest of the group. Check under "Project Information" > "Members".
+- [ ] Every element of the group clones the repository to their own laptops.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+### Day 1, Phase 2
 
-## Test and Deploy
+- [ ] The class you decide the create for the project has finally been named after a brief fight and is __PEP8 compliant, like the entire project__.
 
-Use the built-in continuous integration in GitLab.
+The class will have several methods, which you will __not__ develop in the master branch.  
+Document everything!  
+Make your calls compliant with __Static Type Checking__.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+- [ ] One method will _download_ the data file into a __downloads/__ directory in the root directory of the project (main project directory). If the data file already exists, the method will not download it again.
+- [ ] This method must also read the dataset into a pandas dataframe which is an attribute of your class.
 
-***
+## Day 1, Phase 3
 
-# Editing this README
+- [ ] Develop a second method that outputs a list of the available countries in the data set.
+- [ ] Develop a third method that plots a way to correlate the "\_quantity" columns.
+- [ ] Develop a fourth method that plots an area chart of the *distinct* "\_output_" columns. This method should have two arguments: a __country__ argument and a __normalize__ argument. The former, when receiving *NONE* or 'World' should plot the sum for all *distinct* countries. The latter, if True, normalizes the output in relative terms: each year, output should always be 100%. The X-axis should be the Year. The method should return a ValueError when the chosen country does not exist.
+- [ ] Develop a fifth method that may receive a string with a country or a list of country strings. This method should compare the total of the "\_output_" columns for each of the chosen countries and plot it, so a comparison can be made. The X-axis should be the Year.
+- [ ] Develop a sixth method that must be called __gapminder__. This is a reference to the famous [gapminder tools](https://www.gapminder.org/tools/#$chart-type=bubbles&url=v1). This method should receive an argument __year__ which must be an __int__. If the received argument is not an int, the method should raise a TypeError. This method should plot a scatter plot where __x__ is __fertilizer_quantity__, y is __output_quantity__, and the area of each dot should be a third relevant variable you find with exploration of the data.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Day 1, Phase 4
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+- [ ] Make a "showcase notebook" where you import your __Class__ and showcase all the methods you developed. Tell a story about your analysis and findings in the showcase notebook:
 
-## Name
-Choose a self-explaining name for your project.
+Let's begin by telling a story.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Start by an overall analysis with the gapminder plot for the most recent year. How do you see the world's agricultural production? Write 1-2 short paragraphs about your analysis.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Choose **three** countries in the list. Any countries will do, but choose one from each continent.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Use the fourth method to illustrate each country chosen and point out the main differences.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Use the fifth method to illustrate each country chosen and point out the main differences.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+How do the variables correlate with each other? Run your third method and briefly analyse it.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Finish day one with a very short overall analysis between quantities and outputs.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+<div class="alert alert-danger">
+    <b> REMEMBER: IT IS OK TO PROTOTYPE CODE IN NOTEBOOKS, BUT THE FINAL CLASS MUST BE IN A SINGLE .py FILE! </b>
+    <br>
+    <b> The final delivery of the project is the "showcase" notebook from Phase 4. Don't place this notebook together with prototyping notebooks.</b>
+    <br>
+    <b> Prototyping notebooks must have their own separate directory.</b>
+    <br>
+    <b> We will only consider contents in your "master" repository.</b>
+</div>
