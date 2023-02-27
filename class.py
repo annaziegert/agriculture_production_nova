@@ -188,4 +188,44 @@ class Group22:
         plt.ylabel('Total Output')
         plt.legend()
         plt.show()
+        
+    def __gapminder__(self, year):
+        """
+        Plots a scatter plot to visualize agricultural production data for a given year.
 
+        Parameters
+        ----------
+        year : int 
+            The year for which to plot the agricultural production data.
+
+        Raises
+        ----------
+        TypeError: If year is not an integer.
+        ValueErrof: If year is not present in the DataFrame.
+        
+        Returns
+        ----------
+        None
+
+        The scatter plot shows the relationship between the quantity of fertilizer used and the quantity of agricultural output,
+        with the size of each dot indicating the amount of capital invested. The x-axis is on a logarithmic scale.
+        """
+        if not isinstance(year, int):
+            raise TypeError("Year must be an integer.")
+            
+        if year not in self.df['Year'].unique():
+            raise ValueError("Year not present in DataFrame.")
+
+        data = self.df[self.df['Year'] == year]
+
+        x = data['fertilizer_quantity']
+        y = data['output_quantity']
+        size = data['capital_quantity'] / 10000 # set size based on capital_quantity
+
+        plt.scatter(x, y, s=size)
+        plt.xscale('log')  # set x-axis scale to logarithmic
+        plt.xlabel('Fertilizer Quantity (log scale)')
+        plt.ylabel('Output Quantity')
+        plt.title(f'Agricultural Production ({year})')
+        plt.gca().legend(('Capital Quantity',), scatterpoints=1, fontsize=10)
+        plt.show()
