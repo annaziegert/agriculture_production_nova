@@ -150,6 +150,49 @@ class Group22:
         plt.xlabel("Year")
         plt.ylabel("Output")
         plt.show()
+        
+    def compare_output_countries(self, my_df, countries):
+        """
+        Plots a comparison of the total of the '_output_' column for each of the given countries.
+
+        Parameters:
+        ----------
+        df : pandas dataframe
+            dataframe of the dataset
+        country : str or list
+            country names to compare
+
+        Returns
+        -------
+        line graph of total '_output_' columns of given countries over the years
+        """
+        # Create total output column
+        output_cols = [col for col in self.my_df.columns if '_output_' in col]
+        my_df['total_output'] = self.my_df[output_cols].sum(axis=1)
+
+        # Transform input to list
+        if not isinstance(countries, list):
+            countries = [countries]
+
+        if len(countries) == 1:
+            if countries not in self.get_countries(my_df):
+                raise ValueError(f'{countries} is not a valid country name.')
+            else: 
+                country_selected = self.my_df[my_df['Entity'].isin(countries)][['Entity', 'Year', 'total_output']]
+                plt.plot(country_selected['Year'], country_selected['total_output'], label=countries)
+        else:
+            for i in countries:
+                if i not in self.get_countries(my_df):
+                    raise ValueError(f'{i} is not a valid country name.')
+                else:
+                    country_selected = self.my_df[my_df['Entity'].isin([i])][['Entity', 'Year', 'total_output']]
+                    plt.plot(country_selected['Year'], country_selected['total_output'], label=i)
+
+        plt.title('Comparison of Output Totals for selected Countries')
+        plt.xlabel('Year')
+        plt.ylabel('Total Output')
+        plt.legend()
+        plt.show()
 
     def __gapminder__(self, year):
         """
