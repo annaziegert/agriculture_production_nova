@@ -7,6 +7,7 @@ import pandas as pd
 import requests
 import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 class Group22:
@@ -54,10 +55,13 @@ class Group22:
         -------
         dataframe
         """
-        if not os.path.exists(os.path.join("downloads", self.filename)):
+        if not os.path.exists("../downloads"):
+            os.makedirs("../downloads")
+            
+        if not os.path.exists(os.path.join("../downloads", self.filename)):
             response = requests.get(self.url)
             if response.status_code == 200:
-                with open(os.path.join("downloads", self.filename), "wb") as my_f:
+                with open(os.path.join("../downloads", self.filename), "wb") as my_f:
                     my_f.write(response.content)
                 print(f"{self.filename} has been downloaded")
             else:
@@ -65,14 +69,14 @@ class Group22:
         else:
             print(f"{self.filename} already exists")
 
-        data_path = os.path.join("downloads", self.filename)
+        data_path = os.path.join("../downloads", self.filename)
         my_df = pd.read_csv(data_path, on_bad_lines="skip")
 
         self.my_df = my_df
 
         return my_df
 
-    def get_countries(self, my_df):
+    def get_countries(self):
         """
         Returns a list of unique country names from the
         "Entity" column of the input dataframe.
@@ -87,9 +91,9 @@ class Group22:
         -------
         list of unique country names
         """
-        return list(my_df["Entity"].unique())
+        return list(self.my_df["Entity"].unique())
 
-    def plot_quantity_correlation(self, my_df):
+    def plot_quantity_correlation(self):
         """
         Plots a correlation matrix of quantity columns from the
         input dataframe.
@@ -105,15 +109,19 @@ class Group22:
             Displays a heatmap of the correlation matrix
             of quantity columns.
         """
-        quantity_cols = [col for col in my_df.columns if "_quantity" in col]
-        quantity_df = my_df[quantity_cols]
+        quantity_cols = [col for col in self.my_df.columns if "_quantity" in col]
+        quantity_df = self.my_df[quantity_cols]
         corr_matrix = quantity_df.corr()
+        
+        # Create a boolean mask for the upper triangle of the matrix
+        mask = np.zeros_like(corr_matrix)
+        mask[np.triu_indices_from(mask)] = True
 
-        sns.heatmap(corr_matrix, annot=True, cmap="coolwarm")
+        sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", mask=mask)
         plt.title("Correlation Matrix of Quantity Columns")
         plt.show()
 
-    def plot_output_area_chart(self, my_df, country=None, normalize=False):
+    def plot_output_area_chart(self, country=None, normalize=False):
         """
         Plots an area chart of the distinct "_output_" columns.
 
@@ -153,7 +161,7 @@ class Group22:
             )
             title = "World Output"
         else:
-            if country not in self.get_countries(my_df):
+            if country not in self.get_countries():
                 raise ValueError(f"{country} is not a valid country name.")
             df_country = self.my_df[self.my_df["Entity"] == country][
                 ["Year"] + output_cols
@@ -172,7 +180,7 @@ class Group22:
         plt.ylabel("Output")
         plt.show()
 
-    def compare_output_countries(self, my_df, countries):
+    def compare_output_countries(self, countries):
         """
         Plots a comparison of the total of the '_output_' column for each of the given countries.
 
@@ -196,14 +204,14 @@ class Group22:
         """
         # Create total output column
         output_cols = [col for col in self.my_df.columns if "_output_" in col]
-        my_df["total_output"] = pd.DataFrame(self.my_df)[output_cols].sum(axis=1)
+        self.my_df["total_output"] = pd.DataFrame(self.my_df)[output_cols].sum(axis=1)
 
         # Transform input to list
         if not isinstance(countries, list):
             countries = [countries]
 
         if len(countries) == 1:
-            if countries not in self.get_countries(my_df):
+            if countries not in self.get_countries():
                 raise ValueError(f"{countries} is not a valid country name.")
             country_selected = pd.DataFrame(self.my_df)[my_df["Entity"].isin(countries)][
                 ["Entity", "Year", "total_output"]
@@ -215,9 +223,9 @@ class Group22:
             )
         else:
             for i in countries:
-                if i not in self.get_countries(my_df):
+                if i not in self.get_countries():
                     raise ValueError(f"{i} is not a valid country name.")
-                country_selected = pd.DataFrame(self.my_df)[my_df["Entity"].isin([i])][
+                country_selected = pd.DataFrame(self.my_df)[self.my_df["Entity"].isin([i])][
                     ["Entity", "Year", "total_output"]
                 ]
                 plt.plot(
@@ -268,9 +276,10 @@ class Group22:
         size = data["capital_quantity"] / 10000  # set size based on capital_quantity
 
         plt.scatter(my_x, my_y, s=size)
-        plt.xscale("log")  # set x-axis scale to logarithmic
+        plt.xscale("log") # set x-axis scale to logarithmic
+        plt.yscale("log") # set y-axis scale to logarithmic
         plt.xlabel("Fertilizer Quantity (log scale)")
-        plt.ylabel("Output Quantity")
+        plt.ylabel("Output Quantity (log scale)")
         plt.title(f"Agricultural Production ({year})")
         plt.gca().legend(("Capital Quantity",), scatterpoints=1, fontsize=10)
         plt.show()
