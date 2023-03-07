@@ -10,6 +10,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+remove_country = ['Asia', 'Central Africa', 'Central African Republic', 'Central America', 
+                  'Central Asia','Central Europe', 'Developed Asia', 'Developed countries',
+                  'East Africa', 'Eastern Europe', 'Europe', 'High income', 'Horn of Africa', 
+                  'Latin America and the Caribbean', 'Least developed countries', 'Low income',
+                  'Lower-middle income', 'Micronesia', 'North Africa', 'North America', 
+                  'Northeast Asia', 'Northern Europe', 'Oceania', 'Pacific', 'South Asia', 
+                  'Southeast Asia', 'Southern Africa', 'Southern Europe', 'Sub-Saharan Africa', 
+                  'Upper-middle income', 'West Africa', 'West Asia','Western Europe', 'World',]
+
 class Group22:
     """
     A class to examine a dataset on agriculture.
@@ -27,6 +36,16 @@ class Group22:
     -------
     download_data:
         downloads the dataset and turns it into a pandas dataframe
+    get_countries:
+        creates a list of all countries in the dataframe
+    plot_quantity_correlation:
+        plots a correlation matrix of quantity columns
+    plot_output_area_chart:
+        plots an area chart of output columns
+    compare_countries_output:
+        plots a line graph of output columns for given countries
+    _gapminder_:
+        plots agricultural production data for given year
     """
 
     def __init__(self, url, filename):
@@ -71,7 +90,8 @@ class Group22:
 
         data_path = os.path.join("../downloads", self.filename)
         my_df = pd.read_csv(data_path, on_bad_lines="skip")
-
+        my_df = my_df[~my_df.Entity.isin(remove_country)]
+        
         self.my_df = my_df
 
         return my_df
@@ -119,6 +139,8 @@ class Group22:
 
         sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", mask=mask)
         plt.title("Correlation Matrix of Quantity Columns")
+        plt.annotate('Source: Agricultural total factor productivity (USDA), OWID 2021', (0,0), (-100,-150), fontsize=10, 
+                     xycoords='axes points', textcoords='offset points', va='top')
         plt.show()
 
     def plot_output_area_chart(self, country=None, normalize=False):
@@ -138,15 +160,15 @@ class Group22:
             each year, output should always be 100%.
             Default is False.
 
-        Returns
-        -------
-        None
-
         Raises
         ------
         ValueError
             If no output columns are found in the dataset
             or if the given country name is not valid.
+        
+        Returns
+        -------
+        None
         """
         output_cols = [col for col in self.my_df.columns if "_output_" in col]
         if not output_cols:
@@ -178,6 +200,8 @@ class Group22:
         plt.title(title)
         plt.xlabel("Year")
         plt.ylabel("Output")
+        plt.annotate('Source: Agricultural total factor productivity (USDA), OWID 2021', (0,0), (0,-35), fontsize=10, 
+                     xycoords='axes points', textcoords='offset points', va='top')
         plt.show()
 
     def compare_output_countries(self, countries):
@@ -191,53 +215,42 @@ class Group22:
         country : str or list
             Country or list of countries to compare
 
-        Returns
-        -------
-        None
-
         Raises
         ------
         ValueError
             If no output columns are found in the dataset.
             If the provided country/countries is not
             in the list of valid country names.
+
+        Returns
+        -------
+        None
         """
         # Create total output column
         output_cols = [col for col in self.my_df.columns if "_output_" in col]
-        self.my_df["total_output"] = pd.DataFrame(self.my_df)[output_cols].sum(axis=1)
+        if not output_cols:
+            raise ValueError("No output columns found in the dataset.")
+        else:
+            self.my_df["total_output"] = pd.DataFrame(self.my_df)[output_cols].sum(axis=1)
 
         # Transform input to list
         if not isinstance(countries, list):
-            countries = [countries]
+            countries = countries.split()
 
-        if len(countries) == 1:
-            if countries not in self.get_countries():
-                raise ValueError(f"{countries} is not a valid country name.")
-            country_selected = pd.DataFrame(self.my_df)[my_df["Entity"].isin(countries)][
-                ["Entity", "Year", "total_output"]
-            ]
-            plt.plot(
-                country_selected["Year"],
-                country_selected["total_output"],
-                label=countries,
-            )
-        else:
-            for i in countries:
-                if i not in self.get_countries():
-                    raise ValueError(f"{i} is not a valid country name.")
-                country_selected = pd.DataFrame(self.my_df)[self.my_df["Entity"].isin([i])][
-                    ["Entity", "Year", "total_output"]
-                ]
-                plt.plot(
-                    country_selected["Year"],
-                    country_selected["total_output"],
-                    label=i,
-                )
+        # Plot each given countries output
+        for i in countries:
+            if i not in self.get_countries():
+                raise ValueError(f'{i} is not a valid country name.')
+            else:
+                country_selected = self.my_df[self.my_df['Entity'].isin([i])][['Entity', 'Year', 'total_output']]
+                plt.plot(country_selected['Year'], country_selected['total_output'], label=i)
 
-        plt.title("Comparison of Output Totals for selected Countries")
-        plt.xlabel("Year")
-        plt.ylabel("Total Output")
+        plt.title('Comparison of Output Totals for selected Countries')
+        plt.xlabel('Year')
+        plt.ylabel('Total Output')
         plt.legend()
+        plt.annotate('Source: Agricultural total factor productivity (USDA), OWID 2021', (0,0), (0,-35), fontsize=10, 
+                     xycoords='axes points', textcoords='offset points', va='top')
         plt.show()
 
     def __gapminder__(self, year):
@@ -282,4 +295,7 @@ class Group22:
         plt.ylabel("Output Quantity (log scale)")
         plt.title(f"Agricultural Production ({year})")
         plt.gca().legend(("Capital Quantity",), scatterpoints=1, fontsize=10)
+        plt.annotate('Source: Agricultural total factor productivity (USDA), OWID 2021', (0,0), (0,-40), fontsize=10, 
+                     xycoords='axes points', textcoords='offset points', va='top')
         plt.show()
+
