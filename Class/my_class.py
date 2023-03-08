@@ -49,16 +49,7 @@ class Group22:
     """
 
     def __init__(self, url, filename):
-        """
-        Constructs all the necessary attributes for the class object.
 
-        Parameters
-        ----------
-        url : str
-            url of dataset
-        filename : str
-            filename of dataset
-        """
         self.url = url
         self.filename = filename
 
@@ -93,8 +84,18 @@ class Group22:
         my_df = my_df[~my_df.Entity.isin(remove_country)]
         
         self.my_df = my_df
+        
+        # Download and read geographical dataset
+        geo_filename = "geo_data"
+        if not os.path.exists(os.path.join("../downloads", geo_filename)):
+            geo_path = os.path.join("../downloads", geo_filename)
+            geo_file = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+            geo_df = pd.DataFrame(geo_file)
+            geo_df.to_csv("../downloads/geo_data.csv")
+        else:
+            print(f"{geo_filename} already exists")
 
-        return my_df
+        return my_df, geo_df
 
     def get_countries(self):
         """
