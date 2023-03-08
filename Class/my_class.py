@@ -49,16 +49,7 @@ class Group22:
     """
 
     def __init__(self, url, filename):
-        """
-        Constructs all the necessary attributes for the class object.
 
-        Parameters
-        ----------
-        url : str
-            url of dataset
-        filename : str
-            filename of dataset
-        """
         self.url = url
         self.filename = filename
 
