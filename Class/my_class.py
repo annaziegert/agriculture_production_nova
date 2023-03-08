@@ -4,6 +4,7 @@ This module provides a class with 6 methods
 
 import os
 import pandas as pd
+import geopandas as gpd
 import requests
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -83,17 +84,16 @@ class Group22:
         my_df = pd.read_csv(data_path, on_bad_lines="skip")
         my_df = my_df[~my_df.Entity.isin(remove_country)]
         
-        self.my_df = my_df
-        
         # Download and read geographical dataset
         geo_filename = "geo_data"
         if not os.path.exists(os.path.join("../downloads", geo_filename)):
             geo_path = os.path.join("../downloads", geo_filename)
-            geo_file = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
-            geo_df = pd.DataFrame(geo_file)
-            geo_df.to_csv("../downloads/geo_data.csv")
+            geo_df = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
         else:
             print(f"{geo_filename} already exists")
+            
+        self.my_df = my_df
+        self.geo_df = geo_df
 
         return my_df, geo_df
 
@@ -300,3 +300,56 @@ class Group22:
                      xycoords='axes points', textcoords='offset points', va='top')
         plt.show()
 
+    def choropleth(self, year: int):
+        """
+        Plots a choropleth map to visualize agricultural yield data for a given year.
+
+        Parameters
+        ----------
+        year : int
+            The year for which to plot the agricultural yield data.
+
+        Raises
+        ----------
+        TypeError: If year is not an integer.
+        ValueError: If year is not present in the DataFrame.
+
+        Returns
+        ----------
+        None
+        """
+            
+        # Check if the year is an integer
+        if not isinstance(year, int):
+            raise TypeError('Year must be an integer.')
+    
+        if year not in self.my_df["Year"].unique():
+            raise ValueError('Year not present in DataFrame.')
+    
+        # Merge the dataframes on the country names
+        merge_dict = {'Bosnia and Herzegovina': 'Bosnia and Herz.', 'Myanmar': 'Burma', 'Eswatini': 'eSwatini', 
+              'United States': 'United States of America', 'North Macedonia': 'Macedonia', 
+              'Dominican Republic': 'Dominican Rep.', 'Equatorial Guinea': 'Eq. Guinea'}
+        agr_data = self.my_df.replace({'Entity': merge_dict})
+        merged_data = self.geo_df.merge(agr_data, left_on='name', right_on='Entity', how='left')
+    
+        # Select the data for the specified year
+        merged_data_year = merged_data[merged_data.Year == year][['Year', 'geometry', 'tfp', 'pop_est',
+                                                                  'continent', 'name', 'iso_a3', 'gdp_md_est']]
+        
+        # Plot the data on a world map
+        fig, ax = plt.subplots(figsize=(15, 10))
+        merged_data_year.plot(column='tfp', cmap='YlGnBu', linewidth=0.5, ax=ax, legend=False)
+    
+        # Add a title and remove the axis
+        ax.set_title(f'Agricultural Yield in {year}', fontdict={'fontsize': '25', 'fontweight': '3'})
+        ax.axis('off')
+    
+        # Add a colorbar
+        vmin, vmax = merged_data_year['tfp'].min(), merged_data_year['tfp'].max()
+        sm = plt.cm.ScalarMappable(cmap='YlGnBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
+        sm._A = []
+        cbar = fig.colorbar(sm)
+    
+        # Show the plot
+        plt.show()
