@@ -11,14 +11,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-remove_country = ['Asia', 'Central Africa', 'Central African Republic', 'Central America', 
-                  'Central Asia','Central Europe', 'Developed Asia', 'Developed countries',
-                  'East Africa', 'Eastern Europe', 'Europe', 'High income', 'Horn of Africa', 
-                  'Latin America and the Caribbean', 'Least developed countries', 'Low income',
-                  'Lower-middle income', 'Micronesia', 'North Africa', 'North America', 
+remove_country = ['Asia', 'Sahel', 'Central Africa', 'Central America', 'Central Asia','Central Europe', 
+                  'Developed Asia', 'Developed countries', 'East Africa', 'Eastern Europe', 'Europe', 
+                  'High income', 'Horn of Africa', 'Latin America and the Caribbean', 'Least developed countries', 
+                  'Low income', 'Lower-middle income', 'Micronesia', 'North Africa', 'North America', 
                   'Northeast Asia', 'Northern Europe', 'Oceania', 'Pacific', 'South Asia', 
                   'Southeast Asia', 'Southern Africa', 'Southern Europe', 'Sub-Saharan Africa', 
-                  'Upper-middle income', 'West Africa', 'West Asia','Western Europe', 'World',]
+                  'Upper-middle income', 'West Africa', 'West Asia','Western Europe', 'World']
 
 class Group22:
     """
@@ -318,7 +317,6 @@ class Group22:
         ----------
         None
         """
-            
         # Check if the year is an integer
         if not isinstance(year, int):
             raise TypeError('Year must be an integer.')
@@ -327,9 +325,11 @@ class Group22:
             raise ValueError('Year not present in DataFrame.')
     
         # Merge the dataframes on the country names
-        merge_dict = {'Bosnia and Herzegovina': 'Bosnia and Herz.', 'Myanmar': 'Burma', 'Eswatini': 'eSwatini', 
+        merge_dict = {'Bosnia and Herzegovina': 'Bosnia and Herz.', 'Burma': 'Myanmar', 'Eswatini': 'eSwatini', 
               'United States': 'United States of America', 'North Macedonia': 'Macedonia', 
-              'Dominican Republic': 'Dominican Rep.', 'Equatorial Guinea': 'Eq. Guinea'}
+              'Dominican Republic': 'Dominican Rep.', 'Equatorial Guinea': 'Eq. Guinea', 'South Sudan': 'S. Sudan',
+              'Democratic Republic of Congo': 'Dem. Rep. Congo', 'Solomon Islands': 'Solomon Is.', 'Timor': 'Timor-Leste',
+              'Central African Republic': 'Central African Rep.', 'Macedonia': 'North Macedonia'}
         agr_data = self.my_df.replace({'Entity': merge_dict})
         merged_data = self.geo_df.merge(agr_data, left_on='name', right_on='Entity', how='left')
     
@@ -352,4 +352,6 @@ class Group22:
         cbar = fig.colorbar(sm)
     
         # Show the plot
+        plt.annotate('Source: Natural Earth, 2023', (0,0), (-100,-150), fontsize=10, 
+                     xycoords='axes points', textcoords='offset points', va='top')
         plt.show()
