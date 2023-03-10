@@ -356,7 +356,7 @@ class Group22:
                      xycoords='axes points', textcoords='offset points', va='top')
         plt.show()
         
-    def predictor(self, countries):
+   def predictor(self, countries):
         """
         Generates a plot of actual and predicted Total Factor Productivity (TFP) values for up to three specified countries from 1960 to 2050.
 
@@ -376,18 +376,18 @@ class Group22:
         Generates a plot of actual and predicted TFP values for the specified countries.
         """
         data = my_df
-
-        # Get missing countries and remind user of available countries
-        missing_countries = set(countries) - set(data['Entity'])
-        if len(missing_countries) > 2:
-            message = f"The following countries are not present in the dataset: {', '.join(missing_countries)}. You could try these other options: {', '.join(data['Entity'].sample(5))}."
-            raise ValueError(message)
         
         # Limit the number of countries to a maximum of 3
         if len(countries) > 3:
             countries = countries[:3]
-            print(f"Only the first three countries {', '.join(countries)} will be taken into account for the prediciton.")
-            
+            print(f"Only the first three suggested countries {', '.join(countries)} will be taken into account for the prediciton.")
+
+        # Get missing countries and remind user of available countries
+        missing_countries = set(countries) - set(data['Entity'])
+        if len(missing_countries) == len(countries):
+            message = f"The following suggested countries are not present in the dataset: {', '.join(missing_countries)}. You could try these other options: {', '.join(data['Entity'].sample(5))}."
+            raise ValueError(message)
+        
         # Remove missing countries from the list of countries
         countries = [c for c in countries if c not in missing_countries]
         
