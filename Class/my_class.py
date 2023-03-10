@@ -355,3 +355,67 @@ class Group22:
         plt.annotate('Source: Natural Earth, 2023', (0,0), (-100,-150), fontsize=10, 
                      xycoords='axes points', textcoords='offset points', va='top')
         plt.show()
+        
+    def predictor(self, countries):
+        """
+        Generates a plot of actual and predicted Total Factor Productivity (TFP) values for up to three specified countries from 1960 to 2050.
+
+        Parameters
+        ----------
+        countries : list
+            A list of country names for which the TFP data should be plotted.
+
+        Raises
+        ----------
+        ValueError: If all of the specified countries are not present in the dataset. Suggests alternative country options.
+
+        Returns
+        ----------
+        None
+        
+        Generates a plot of actual and predicted TFP values for the specified countries.
+        """
+        data = my_df
+
+        # Get missing countries and remind user of available countries
+        missing_countries = set(countries) - set(data['Entity'])
+        if len(missing_countries) > 2:
+            message = f"The following countries are not present in the dataset: {', '.join(missing_countries)}. You could try these other options: {', '.join(data['Entity'].sample(5))}."
+            raise ValueError(message)
+        
+        # Limit the number of countries to a maximum of 3
+        if len(countries) > 3:
+            countries = countries[:3]
+            print(f"Only the first three countries {', '.join(countries)} will be taken into account for the prediciton.")
+            
+        # Remove missing countries from the list of countries
+        countries = [c for c in countries if c not in missing_countries]
+        
+        # Iterate over the specified countries and plot their actual TFP data
+        fig, ax = plt.subplots()
+        
+        # Iterate over the specified countries and plot their actual TFP data
+        for country in countries:
+            country_data = data[data['Entity']==country]
+            
+            # Compute weights for each year based on its distance from the most recent year
+            weights = np.linspace(1, 0.5, len(country_data))
+            tfp_data = country_data['tfp'].values
+            weighted_tfp = np.average(tfp_data, weights=weights)
+            years = country_data['Year'].values
+            ax.plot(years, tfp_data, label=country)
+            
+            # Fit an ETS model to the data and predict future values
+            model = ExponentialSmoothing(tfp_data, trend='add')
+            model_fit = model.fit()
+            future_years = range(max(years)+1, 2051)
+            predicted_values = model_fit.predict(start=len(tfp_data), end=len(tfp_data)+len(future_years)-1)
+            
+            # Plot the predicted values for the country
+            ax.plot(future_years, predicted_values, linestyle='--', color=ax.lines[-1].get_color())
+        
+        ax.legend()
+        ax.set_xlabel('Year')
+        ax.set_ylabel('TFP')
+        ax.set_title('TFP per Year by Country')
+        plt.show()
