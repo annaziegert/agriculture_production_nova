@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from statsmodels.tsa.api import ExponentialSmoothing
 
+
 class Group22:
     """
     A class to examine a dataset on agriculture.
@@ -35,13 +36,14 @@ class Group22:
     plot_output_area_chart:
         plots an area chart of output columns
     compare_countries_output:
-        plots a line graph of output columns for given countries
+        plots a line graph of output columns for specified countries
     _gapminder_:
         plots agricultural production data for given year
     choropleth:
-        
+        plots a choropleth map to visualize agricultural yield data for a given year
+    predictor:
+        plots the actual and predicted tfp values for up to three specified countries from 1960 to 2050
     """
-
     def __init__(self, url, filename):
 
         self.url = url
