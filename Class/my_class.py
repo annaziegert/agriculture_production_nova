@@ -9,15 +9,7 @@ import requests
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-
-
-remove_country = ['Asia', 'Sahel', 'Central Africa', 'Central America', 'Central Asia','Central Europe', 
-                  'Developed Asia', 'Developed countries', 'East Africa', 'Eastern Europe', 'Europe', 
-                  'High income', 'Horn of Africa', 'Latin America and the Caribbean', 'Least developed countries', 
-                  'Low income', 'Lower-middle income', 'Micronesia', 'North Africa', 'North America', 
-                  'Northeast Asia', 'Northern Europe', 'Oceania', 'Pacific', 'South Asia', 
-                  'Southeast Asia', 'Southern Africa', 'Southern Europe', 'Sub-Saharan Africa', 
-                  'Upper-middle income', 'West Africa', 'West Asia','Western Europe', 'World']
+from statsmodels.tsa.api import ExponentialSmoothing
 
 class Group22:
     """
@@ -35,7 +27,7 @@ class Group22:
     Methods
     -------
     download_data:
-        downloads the dataset and turns it into a pandas dataframe
+        downloads two datasets and turns the first one into a pandas dataframe, the second one is a geopandas dataframe
     get_countries:
         creates a list of all countries in the dataframe
     plot_quantity_correlation:
@@ -46,6 +38,8 @@ class Group22:
         plots a line graph of output columns for given countries
     _gapminder_:
         plots agricultural production data for given year
+    choropleth:
+        
     """
 
     def __init__(self, url, filename):
@@ -55,7 +49,7 @@ class Group22:
 
     def download_data(self):
         """
-        Returns a dataframe from the dataset
+        Returns agricultural dataframe from the dataset and geodataframe from Natural Earth
 
         Parameters
         ----------
@@ -63,7 +57,7 @@ class Group22:
 
         Returns
         -------
-        dataframe
+        dataframes
         """
         if not os.path.exists("../downloads"):
             os.makedirs("../downloads")
@@ -81,7 +75,16 @@ class Group22:
 
         data_path = os.path.join("../downloads", self.filename)
         my_df = pd.read_csv(data_path, on_bad_lines="skip")
-        my_df = my_df[~my_df.Entity.isin(remove_country)]
+        
+        # Remove aggregated columns
+        agg_cols = ['Asia', 'Sahel', 'Central Africa', 'Central America', 'Central Asia','Central Europe', 
+                    'Developed Asia', 'Developed countries', 'East Africa', 'Eastern Europe', 'Europe', 
+                    'High income', 'Horn of Africa', 'Latin America and the Caribbean', 'Least developed countries', 
+                    'Low income', 'Lower-middle income', 'Micronesia', 'North Africa', 'North America', 
+                    'Northeast Asia', 'Northern Europe', 'Oceania', 'Pacific', 'South Asia', 
+                    'Southeast Asia', 'Southern Africa', 'Southern Europe', 'Sub-Saharan Africa', 
+                    'Upper-middle income', 'West Africa', 'West Asia','Western Europe', 'World']
+        my_df = my_df[~my_df.Entity.isin(agg_cols)]
         
         # Download and read geographical dataset
         geo_filename = "geo_data"
@@ -99,13 +102,11 @@ class Group22:
     def get_countries(self):
         """
         Returns a list of unique country names from the
-        "Entity" column of the input dataframe.
+        "Entity" column of the agricultural dataframe.
 
         Parameters
         ----------
-        my_df : pandas dataframe
-            The input dataframe to extract unique
-            country names from.
+        None
 
         Returns
         -------
@@ -120,8 +121,7 @@ class Group22:
 
         Parameters
         ----------
-        my_df : pandas dataframe
-            The input dataframe to extract quantity columns from.
+        None
 
         Returns
         -------
@@ -149,8 +149,6 @@ class Group22:
 
         Parameters
         ----------
-        my_df : pandas dataframe
-            dataframe of the dataset
         country : str, optional
             The name of the country to plot the output for.
             If None or 'World', plots the sum for all countries.
@@ -163,8 +161,8 @@ class Group22:
         Raises
         ------
         ValueError
-            If no output columns are found in the dataset
-            or if the given country name is not valid.
+            If no output columns are found in the dataset.
+            If the given country name is not valid.
         
         Returns
         -------
@@ -210,17 +208,14 @@ class Group22:
 
         Parameters:
         ----------
-        my_df : pandas dataframe
-            dataframe of the dataset
-        country : str or list
+        countries : str or list
             Country or list of countries to compare
 
         Raises
         ------
         ValueError
             If no output columns are found in the dataset.
-            If the provided country/countries is not
-            in the list of valid country names.
+            If the provided country/countries is not in the list of valid country names.
 
         Returns
         -------
@@ -245,7 +240,7 @@ class Group22:
                 country_selected = self.my_df[self.my_df['Entity'].isin([i])][['Entity', 'Year', 'total_output']]
                 plt.plot(country_selected['Year'], country_selected['total_output'], label=i)
 
-        plt.title('Comparison of Output Totals for selected Countries')
+        plt.title(f'Comparison of Output Totals for selected Countries ({countries})')
         plt.xlabel('Year')
         plt.ylabel('Total Output')
         plt.legend()
@@ -253,7 +248,7 @@ class Group22:
                      xycoords='axes points', textcoords='offset points', va='top')
         plt.show()
 
-    def __gapminder__(self, year):
+    def __gapminder__(self, year: int):
         """
         Plots a scatter plot to visualize agricultural production data for a given year.
 
@@ -326,10 +321,10 @@ class Group22:
     
         # Merge the dataframes on the country names
         merge_dict = {'Bosnia and Herzegovina': 'Bosnia and Herz.', 'Burma': 'Myanmar', 'Eswatini': 'eSwatini', 
-              'United States': 'United States of America', 'North Macedonia': 'Macedonia', 
-              'Dominican Republic': 'Dominican Rep.', 'Equatorial Guinea': 'Eq. Guinea', 'South Sudan': 'S. Sudan',
-              'Democratic Republic of Congo': 'Dem. Rep. Congo', 'Solomon Islands': 'Solomon Is.', 'Timor': 'Timor-Leste',
-              'Central African Republic': 'Central African Rep.', 'Macedonia': 'North Macedonia'}
+                      'United States': 'United States of America', 'North Macedonia': 'Macedonia', 
+                      'Dominican Republic': 'Dominican Rep.', 'Equatorial Guinea': 'Eq. Guinea', 'South Sudan': 'S. Sudan',
+                      'Democratic Republic of Congo': 'Dem. Rep. Congo', 'Solomon Islands': 'Solomon Is.', 'Timor': 'Timor-Leste',
+                      'Central African Republic': 'Central African Rep.', 'Macedonia': 'North Macedonia'}
         agr_data = self.my_df.replace({'Entity': merge_dict})
         merged_data = self.geo_df.merge(agr_data, left_on='name', right_on='Entity', how='left')
     
@@ -338,27 +333,28 @@ class Group22:
                                                                   'continent', 'name', 'iso_a3', 'gdp_md_est']]
         
         # Plot the data on a world map
-        fig, ax = plt.subplots(figsize=(15, 10))
-        merged_data_year.plot(column='tfp', cmap='YlGnBu', linewidth=0.5, ax=ax, legend=False)
+        fig, ax = plt.subplots(figsize=(20, 15))
+        merged_data_year.plot(column='tfp', cmap='YlGnBu', linewidth=1, ax=ax, legend=False)
     
         # Add a title and remove the axis
-        ax.set_title(f'Agricultural Yield in {year}', fontdict={'fontsize': '25', 'fontweight': '3'})
+        ax.set_title(f'Agricultural Yield in {year}', fontdict={'fontsize': '15', 'fontweight': '2'})
         ax.axis('off')
     
         # Add a colorbar
         vmin, vmax = merged_data_year['tfp'].min(), merged_data_year['tfp'].max()
         sm = plt.cm.ScalarMappable(cmap='YlGnBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
         sm._A = []
-        cbar = fig.colorbar(sm)
+        cbar = fig.colorbar(sm, shrink=0.3)
     
         # Show the plot
-        plt.annotate('Source: Natural Earth, 2023', (0,0), (-100,-150), fontsize=10, 
+        plt.annotate('Source: Natural Earth, 2023', (0,0), (50,0), fontsize=10, 
                      xycoords='axes points', textcoords='offset points', va='top')
         plt.show()
         
-   def predictor(self, countries):
+    def predictor(self, countries):
         """
-        Generates a plot of actual and predicted Total Factor Productivity (TFP) values for up to three specified countries from 1960 to 2050.
+        Plots the actual and predicted Total Factor Productivity (TFP) values for up to three specified countries 
+        from 1960 to 2050.
 
         Parameters
         ----------
@@ -367,6 +363,7 @@ class Group22:
 
         Raises
         ----------
+        TypeError: If countries is not a list.
         ValueError: If all of the specified countries are not present in the dataset. Suggests alternative country options.
 
         Returns
@@ -375,22 +372,29 @@ class Group22:
         
         Generates a plot of actual and predicted TFP values for the specified countries.
         """
-        data = my_df
+        # Check if countries is a list
+        if not isinstance(countries, list):
+            raise TypeError('Input must be a list of countries.')
         
-        # Limit the number of countries to a maximum of 3
+        data = self.my_df
+        
+        # Filter the data for the selected countries
+        filtered_data = data[data['Entity'].isin(countries)]
+
+        # Check if any country is valid
+        if len(filtered_data['Entity'].unique()) == 0:
+            raise ValueError(f'Non of the given countries are in the dataframe. Please choose any of the following countries:\n{data.Entity.unique()}')
+        
+        # Check if any country is missing
+        if len(filtered_data['Entity'].unique()) < len(countries):
+            missing_countries = set(countries) - set(filtered_data['Entity'].unique())
+            print(f"Warning: The following countries are missing from the dataset and will be ignored: {missing_countries}")
+            countries = list(set(countries) - missing_countries)
+
         if len(countries) > 3:
             countries = countries[:3]
             print(f"Only the first three suggested countries {', '.join(countries)} will be taken into account for the prediciton.")
 
-        # Get missing countries and remind user of available countries
-        missing_countries = set(countries) - set(data['Entity'])
-        if len(missing_countries) == len(countries):
-            message = f"The following suggested countries are not present in the dataset: {', '.join(missing_countries)}. You could try these other options: {', '.join(data['Entity'].sample(5))}."
-            raise ValueError(message)
-        
-        # Remove missing countries from the list of countries
-        countries = [c for c in countries if c not in missing_countries]
-        
         # Iterate over the specified countries and plot their actual TFP data
         fig, ax = plt.subplots()
         
@@ -418,4 +422,6 @@ class Group22:
         ax.set_xlabel('Year')
         ax.set_ylabel('TFP')
         ax.set_title('TFP per Year by Country')
+        plt.annotate('Source: Natural Earth, 2023', (0,0), (0,-40), fontsize=10, 
+                     xycoords='axes points', textcoords='offset points', va='top')
         plt.show()

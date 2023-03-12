@@ -1,4 +1,4 @@
-# Welcome to Group 22 of Project Agros
+# Welcome to Group 22 of the Project Agros
 ---
 
 ## Scenario
