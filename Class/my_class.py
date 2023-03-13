@@ -301,7 +301,7 @@ class Group22:
                     country_selected["Year"], country_selected["total_output"], label=i
                 )
 
-        plt.title(f"Comparison of Output Totals for selected Countries ({countries})")
+        plt.title(f"Total Output for {', '.join(countries)}")
         plt.xlabel("Year")
         plt.ylabel("Total Output")
         plt.legend()
@@ -415,7 +415,7 @@ class Group22:
 
         plt.show()
 
-    def choropleth(self, year: int):
+    def choropleth(self, year: int, v_lower=None, v_upper=None):
         """
         Plots a choropleth map to visualize agricultural yield data for a given year.
 
@@ -423,13 +423,19 @@ class Group22:
         ----------
         year : int
             The year for which to plot the agricultural yield data.
+        v_lower : float or int, optional
+            The lower bound of the color range.
+        v_upper : float or int, optional
+            The upper bound of the color range.
 
         Raises
         ------
         TypeError
             If year is not an integer.
+            If v_lower or v_upper are not floats or integers.
         ValueError
             If year is not present in the DataFrame.
+            If v_lower or v_upper are negative numbers.
 
         Returns
         -------
@@ -437,77 +443,56 @@ class Group22:
         """
         # Check if the year is an integer
         if not isinstance(year, int):
-            raise TypeError("Year must be an integer.")
+            raise TypeError('Year must be an integer.')
 
         if year not in self.my_df["Year"].unique():
-            raise ValueError("Year not present in DataFrame.")
+            raise ValueError('Year not present in DataFrame.')
 
         # Merge the dataframes on the country names
-        merge_dict = {
-            "Bosnia and Herzegovina": "Bosnia and Herz.",
-            "Burma": "Myanmar",
-            "Eswatini": "eSwatini",
-            "United States": "United States of America",
-            "North Macedonia": "Macedonia",
-            "Dominican Republic": "Dominican Rep.",
-            "Equatorial Guinea": "Eq. Guinea",
-            "South Sudan": "S. Sudan",
-            "Democratic Republic of Congo": "Dem. Rep. Congo",
-            "Solomon Islands": "Solomon Is.",
-            "Timor": "Timor-Leste",
-            "Central African Republic": "Central African Rep.",
-            "Macedonia": "North Macedonia",
-        }
-        agr_data = self.my_df.replace({"Entity": merge_dict})
-        merged_data = self.geo_df.merge(
-            agr_data, left_on="name", right_on="Entity", how="left"
-        )
+        merge_dict = {'Bosnia and Herzegovina': 'Bosnia and Herz.', 'Burma': 'Myanmar', 'Eswatini': 'eSwatini',
+                      'United States': 'United States of America', 'North Macedonia': 'Macedonia',
+                      'Dominican Republic': 'Dominican Rep.', 'Equatorial Guinea': 'Eq. Guinea', 'South Sudan': 'S. Sudan',
+                      'Democratic Republic of Congo': 'Dem. Rep. Congo', 'Solomon Islands': 'Solomon Is.', 'Timor': 'Timor-Leste',
+                      'Central African Republic': 'Central African Rep.', 'Macedonia': 'North Macedonia'}
+        agr_data = self.my_df.replace({'Entity': merge_dict})
+        merged_data = self.geo_df.merge(agr_data, left_on='name', right_on='Entity', how='left')
 
         # Select the data for the specified year
-        merged_data_year = merged_data[merged_data.Year == year][
-            [
-                "Year",
-                "geometry",
-                "tfp",
-                "pop_est",
-                "continent",
-                "name",
-                "iso_a3",
-                "gdp_md_est",
-            ]
-        ]
+        merged_data_year = merged_data[merged_data.Year == year][['Year', 'geometry', 'tfp', 'pop_est',
+                                                                  'continent', 'name', 'iso_a3', 'gdp_md_est']]
 
         # Plot the data on a world map
         fig, ax = plt.subplots(figsize=(20, 15))
-        merged_data_year.plot(
-            column="tfp", cmap="YlGnBu", linewidth=1, ax=ax, legend=False
-        )
-
-        # Add a title and remove the axis
-        ax.set_title(
-            f"Agricultural Yield in {year}",
-            fontdict={"fontsize": "15", "fontweight": "2"},
-        )
-        ax.axis("off")
 
         # Add a colorbar
-        vmin, vmax = merged_data_year["tfp"].min(), merged_data_year["tfp"].max()
-        sm = plt.cm.ScalarMappable(
-            cmap="YlGnBu", norm=plt.Normalize(vmin=vmin, vmax=vmax)
-        )
+        vmin, vmax = merged_data_year['tfp'].min(), merged_data_year['tfp'].max()
+        print('TFP values')
+        print('Max:',int(merged_data_year['tfp'].max()))
+        print('Min:',int(merged_data_year['tfp'].min()))
+        print('Mean: ',int(merged_data_year['tfp'].mean()))
+        print('Median:',int(merged_data_year['tfp'].median()))
+        
+        if v_lower is not None:
+            if not isinstance(v_lower, (int, float)) or v_lower < 0:
+                raise ValueError("v_lower cannot be negative.")
+            vmin = v_lower
+        if v_upper is not None:
+            if not isinstance(v_upper, (int, float)) or v_upper < 0:
+                raise ValueError("v_upper cannot be negative.")
+            vmax = v_upper
+        merged_data_year.plot(column='tfp', cmap='YlGnBu', linewidth=1, ax=ax, legend=False, vmin=vmin, vmax=vmax)
+
+        # Add a title and remove the axis
+        ax.set_title(f'Agricultural Yield in {year}', fontdict={'fontsize': '15', 'fontweight': '2'})
+        ax.axis('off')
+
+        sm = plt.cm.ScalarMappable(cmap='YlGnBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
         sm._A = []
         cbar = fig.colorbar(sm, shrink=0.3)
-
+    
         # Show the plot
-        plt.annotate(
-            "Source: Natural Earth, 2023",
-            (0, 0),
-            (50, 0),
-            fontsize=10,
-            xycoords="axes points",
-            textcoords="offset points",
-            va="top",
-        )
+        plt.annotate('Source: Natural Earth, 2023', (0,0), (50,0), fontsize=10, 
+                     xycoords='axes points', textcoords='offset points', va='top')
         plt.show()
 
     def predictor(self, countries):
