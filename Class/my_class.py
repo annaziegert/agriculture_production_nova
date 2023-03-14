@@ -26,7 +26,7 @@ class Group22:
     Methods
     -------
     download_data:
-        Downloads two datasets and turns the first one into a pandas DataFrame; the second one is a GeoPandas DataFrame.
+        Download two datasets, convert first to pandas DataFrame, second to GeoPandas DataFrame.
     get_countries:
         Creates a list of all countries in the DataFrame.
     plot_quantity_correlation:
@@ -40,24 +40,11 @@ class Group22:
     choropleth:
         Plots a choropleth map to visualize agricultural yield data for a given year.
     predictor:
-        Plots the actual and predicted TFP values for up to three specified countries from 1960 to 2050.
+        Plots actual and predicted TFP for 3 countries (1960-2050).
     """
 
     def __init__(self, url, filename):
-        """
-        Initializes an instance of the Group22 class.
 
-        Parameters
-        ----------
-        url : str
-            The URL of the dataset.
-        filename : str
-            The filename of the dataset.
-
-        Returns
-        -------
-        None
-        """
         self.url = url
         self.filename = filename
 
@@ -132,7 +119,7 @@ class Group22:
         # Download and read geographical dataset
         geo_filename = "geo_data"
         if not os.path.exists(os.path.join("../downloads", geo_filename)):
-            geo_path = os.path.join("../downloads", geo_filename)
+            os.path.join("../downloads", geo_filename)
             geo_df = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
         else:
             print(f"{geo_filename} already exists")
@@ -280,9 +267,8 @@ class Group22:
         output_cols = [col for col in self.my_df.columns if "_output_" in col]
         if not output_cols:
             raise ValueError("No output columns found in the dataset.")
-        else:
-            self.my_df["total_output"] = pd.DataFrame(self.my_df)[output_cols].sum(
-                axis=1
+        self.my_df["total_output"] = pd.DataFrame(self.my_df)[output_cols].sum(
+            axis=1
             )
 
         # Transform input to list
@@ -293,15 +279,14 @@ class Group22:
         for i in countries:
             if i not in self.get_countries():
                 raise ValueError(f"{i} is not a valid country name.")
-            else:
-                country_selected = self.my_df[self.my_df["Entity"].isin([i])][
+            country_selected = self.my_df[self.my_df["Entity"].isin([i])][
                     ["Entity", "Year", "total_output"]
-                ]
-                plt.plot(
-                    country_selected["Year"], country_selected["total_output"], label=i
-                )
+            ]
+            plt.plot(
+                country_selected["Year"], country_selected["total_output"], label=i
+            )
 
-        plt.title(f"Comparison of Output Totals for selected Countries ({countries})")
+        plt.title(f"Total Output for {', '.join(countries)}")
         plt.xlabel("Year")
         plt.ylabel("Total Output")
         plt.legend()
@@ -325,7 +310,7 @@ class Group22:
         year : int
             The year for which to plot the agricultural production data.
         y_limit : int or float, optional
-            The upper limit of the y-axis scale. If not given, the y-axis scale will be determined dynamically based on the data.
+            Sets y-axis limit or determine dynamically.
 
         Raises
         ----------
@@ -342,7 +327,7 @@ class Group22:
 
         Notes
         ----------
-        The scatter plot shows the relationship between the quantity of fertilizer used and the quantity of agricultural output,
+        The Scatter plot shows the relationship between fertilizer and output,
         with the size of each dot indicating the amount of capital invested.
         The x-axis is on a logarithmic scale, and the y-axis scales to a fixed level of billions.
         The data points are labeled with the corresponding country names.
@@ -369,9 +354,7 @@ class Group22:
         )  # set size based on capital_quantity
         country_names = data["Entity"].reset_index(drop=True)
 
-        fig, ax = plt.subplots(
-            figsize=(16, 10)
-        )  # set figure size to 16 inches by 10 inches
+        plt.subplots(figsize=(16, 10))
         plt.scatter(my_x, my_y, s=size)
         plt.xscale("log")  # set x-axis scale to logarithmic
         plt.xlabel("Fertilizer Quantity (log scale)", fontsize=15)
@@ -415,7 +398,7 @@ class Group22:
 
         plt.show()
 
-    def choropleth(self, year: int):
+    def choropleth(self, year: int, v_lower=None, v_upper=None):
         """
         Plots a choropleth map to visualize agricultural yield data for a given year.
 
@@ -423,13 +406,19 @@ class Group22:
         ----------
         year : int
             The year for which to plot the agricultural yield data.
+        v_lower : float or int, optional
+            The lower bound of the color range.
+        v_upper : float or int, optional
+            The upper bound of the color range.
 
         Raises
         ------
         TypeError
             If year is not an integer.
+            If v_lower or v_upper are not floats or integers.
         ValueError
             If year is not present in the DataFrame.
+            If v_lower or v_upper are negative numbers.
 
         Returns
         -------
@@ -456,7 +445,6 @@ class Group22:
             "Solomon Islands": "Solomon Is.",
             "Timor": "Timor-Leste",
             "Central African Republic": "Central African Rep.",
-            "Macedonia": "North Macedonia",
         }
         agr_data = self.my_df.replace({"Entity": merge_dict})
         merged_data = self.geo_df.merge(
@@ -479,8 +467,31 @@ class Group22:
 
         # Plot the data on a world map
         fig, ax = plt.subplots(figsize=(20, 15))
+
+        # Add a colorbar
+        vmin, vmax = merged_data_year["tfp"].min(), merged_data_year["tfp"].max()
+        print("TFP values")
+        print("Max:", int(merged_data_year["tfp"].max()))
+        print("Min:", int(merged_data_year["tfp"].min()))
+        print("Mean: ", int(merged_data_year["tfp"].mean()))
+        print("Median:", int(merged_data_year["tfp"].median()))
+
+        if v_lower is not None:
+            if not isinstance(v_lower, (int, float)) or v_lower < 0:
+                raise ValueError("v_lower cannot be negative.")
+            vmin = v_lower
+        if v_upper is not None:
+            if not isinstance(v_upper, (int, float)) or v_upper < 0:
+                raise ValueError("v_upper cannot be negative.")
+            vmax = v_upper
         merged_data_year.plot(
-            column="tfp", cmap="YlGnBu", linewidth=1, ax=ax, legend=False
+            column="tfp",
+            cmap="YlGnBu",
+            linewidth=1,
+            ax=ax,
+            legend=False,
+            vmin=vmin,
+            vmax=vmax,
         )
 
         # Add a title and remove the axis
@@ -490,13 +501,11 @@ class Group22:
         )
         ax.axis("off")
 
-        # Add a colorbar
-        vmin, vmax = merged_data_year["tfp"].min(), merged_data_year["tfp"].max()
         sm = plt.cm.ScalarMappable(
             cmap="YlGnBu", norm=plt.Normalize(vmin=vmin, vmax=vmax)
         )
         sm._A = []
-        cbar = fig.colorbar(sm, shrink=0.3)
+        fig.colorbar(sm, shrink=0.3)
 
         # Show the plot
         plt.annotate(
@@ -512,7 +521,7 @@ class Group22:
 
     def predictor(self, countries):
         """
-        Generates a plot of actual and predicted Total Factor Productivity (TFP) values for up to three specified countries from 1960 to 2050.
+        Plots actual and predicted TFP (1960-2050) for 3 countries.
 
         Parameters
         ----------
@@ -522,7 +531,7 @@ class Group22:
         Raises
         ----------
         ValueError
-            If all of the specified countries are not present in the dataset. Suggests alternative country options.
+            If no given country in the dataset. Suggests alternative country options.
 
         Returns
         ----------
@@ -535,13 +544,13 @@ class Group22:
         if len(countries) > 3:
             countries = countries[:3]
             print(
-                f"Only the first three suggested countries {', '.join(countries)} will be taken into account for the prediciton."
+                f"Only first 3 countries {', '.join(countries)} will be considered for prediciton."
             )
 
         # Get missing countries and remind user of available countries
         missing_countries = set(countries) - set(data["Entity"])
         if len(missing_countries) == len(countries):
-            message = f"The following suggested countries are not present in the dataset: {', '.join(missing_countries)}. You could try these other options: {', '.join(data['Entity'].sample(5))}."
+            message = f"Countries not present: {', '.join(missing_countries)}. Try: {', '.join(data['Entity'].sample(5))}."
             raise ValueError(message)
 
         # Remove missing countries from the list of countries
@@ -553,11 +562,7 @@ class Group22:
         # Iterate over the specified countries and plot their actual TFP data
         for country in countries:
             country_data = data[data["Entity"] == country]
-
-            # Compute weights for each year based on its distance from the most recent year
-            weights = np.linspace(1, 0.5, len(country_data))
             tfp_data = country_data["tfp"].values
-            weighted_tfp = np.average(tfp_data, weights=weights)
             years = country_data["Year"].values
             ax.plot(years, tfp_data, label=country)
 
@@ -581,4 +586,13 @@ class Group22:
         ax.set_xlabel("Year")
         ax.set_ylabel("TFP")
         ax.set_title("TFP per Year by Country")
+        plt.annotate(
+            'Source: Natural Earth, 2023',
+            (0, 0),
+            (0, -40),
+            fontsize=10,
+            xycoords="axes points",
+            textcoords="offset points",
+            va="top",
+        )
         plt.show()
