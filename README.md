@@ -62,4 +62,8 @@ Please make sure to update tests as appropriate.
 
 ## License
 
+<<<<<<< HEAD
 [LINK](https://gitlab.com/annaziegert/group_22/-/blob/4de67b8144a70dcde74bf968068d653c53add3fc/LICENSE)
+=======
+[LINK](https://gitlab.com/annaziegert/group_22/-/blob/4de67b8144a70dcde74bf968068d653c53add3fc/LICENSE)
+>>>>>>> 0971cc4814e68d09c63842628d1ba6ee937a9c6e
