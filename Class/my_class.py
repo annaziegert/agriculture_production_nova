@@ -44,20 +44,7 @@ class Group22:
     """
 
     def __init__(self, url, filename):
-        """
-        Initializes an instance of the Group22 class.
-
-        Parameters
-        ----------
-        url : str
-            The URL of the dataset.
-        filename : str
-            The filename of the dataset.
-
-        Returns
-        -------
-        None
-        """
+       
         self.url = url
         self.filename = filename
 
@@ -453,7 +440,7 @@ class Group22:
                       'United States': 'United States of America', 'North Macedonia': 'Macedonia',
                       'Dominican Republic': 'Dominican Rep.', 'Equatorial Guinea': 'Eq. Guinea', 'South Sudan': 'S. Sudan',
                       'Democratic Republic of Congo': 'Dem. Rep. Congo', 'Solomon Islands': 'Solomon Is.', 'Timor': 'Timor-Leste',
-                      'Central African Republic': 'Central African Rep.', 'Macedonia': 'North Macedonia'}
+                      'Central African Republic': 'Central African Rep.'}
         agr_data = self.my_df.replace({'Entity': merge_dict})
         merged_data = self.geo_df.merge(agr_data, left_on='name', right_on='Entity', how='left')
 
